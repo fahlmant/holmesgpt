@@ -1,6 +1,6 @@
 # Google Vertex AI
 
-Configure HolmesGPT to use Google Vertex AI with Gemini models.
+Configure HolmesGPT to use Google Vertex AI with Gemini and Claude models.
 
 ## Setup
 
@@ -153,6 +153,20 @@ You can also pass credentials directly as command-line parameters:
 
 ```bash
 holmes ask "what pods are failing?" --model="vertex_ai/<your-vertex-model>" --api-key="your-service-account-key"
+```
+
+## Claude on Vertex AI
+
+HolmesGPT also supports Anthropic Claude models through Vertex AI. Use these environment variables for Claude-specific configuration:
+
+```bash
+# Claude-specific environment variables
+export CLAUDE_CODE_USE_VERTEX=1
+export ANTHROPIC_VERTEX_PROJECT_ID="your-project-id"
+export VERTEXAI_LOCATION="us-central1"
+
+# Use Claude models via Vertex AI
+holmes ask "what pods are failing?" --model="vertex_ai/claude-3-5-sonnet@20240620"
 ```
 
 ## Additional Resources

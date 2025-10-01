@@ -144,6 +144,28 @@ class DefaultLLM(LLM):
             os.environ.get("AWS_PROFILE") or os.environ.get("AWS_BEARER_TOKEN_BEDROCK")
         ):
             model_requirements = {"keys_in_environment": True, "missing_keys": []}
+        elif provider == "vertex_ai" and "claude" in model.lower():
+            # Special handling for Vertex AI Claude models
+            model_requirements = {"missing_keys": [], "keys_in_environment": True}
+            # Check for required Vertex AI environment variables
+            if "VERTEXAI_PROJECT" not in os.environ and "ANTHROPIC_VERTEX_PROJECT_ID" not in os.environ:
+                model_requirements["missing_keys"].append("VERTEXAI_PROJECT or ANTHROPIC_VERTEX_PROJECT_ID")  # type: ignore
+                model_requirements["keys_in_environment"] = False
+            if "VERTEXAI_LOCATION" not in os.environ:
+                model_requirements["missing_keys"].append("VERTEXAI_LOCATION")  # type: ignore
+                model_requirements["keys_in_environment"] = False
+            # Authentication check - either service account key or gcloud auth
+            if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
+                try:
+                    import subprocess
+                    result = subprocess.run(["gcloud", "auth", "list", "--filter=status:ACTIVE", "--format=value(account)"], 
+                                          capture_output=True, text=True, timeout=5)
+                    if not result.stdout.strip():
+                        model_requirements["missing_keys"].append("GOOGLE_APPLICATION_CREDENTIALS or gcloud auth")  # type: ignore
+                        model_requirements["keys_in_environment"] = False
+                except (subprocess.TimeoutExpired, subprocess.CalledProcessError, FileNotFoundError):
+                    model_requirements["missing_keys"].append("GOOGLE_APPLICATION_CREDENTIALS or gcloud auth")  # type: ignore
+                    model_requirements["keys_in_environment"] = False
         else:
             model_requirements = litellm.validate_environment(
                 model=model, api_key=api_key, api_base=api_base

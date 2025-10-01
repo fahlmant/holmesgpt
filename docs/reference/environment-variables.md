@@ -29,6 +29,10 @@ This page documents all environment variables that can be used to configure Holm
 - `VERTEXAI_LOCATION` - Vertex AI location (e.g., "us-central1")
 - `GOOGLE_APPLICATION_CREDENTIALS` - Path to service account key JSON file
 
+### Google Vertex AI with Claude
+- `CLAUDE_CODE_USE_VERTEX` - Enable Vertex AI for Claude models (true/false)
+- `ANTHROPIC_VERTEX_PROJECT_ID` - Google Cloud project ID for Anthropic models (alternative to VERTEXAI_PROJECT)
+
 ## LLM Tool Calling Configuration
 
 ### LLMS_WITH_STRICT_TOOL_CALLS
@@ -191,6 +195,17 @@ export RUN_LIVE=true
 export MODEL="custom/model-v2"
 
 poetry run pytest tests/llm/ -n 6
+```
+
+### Vertex AI Claude Configuration
+```bash
+# Set up Claude via Google Vertex AI
+export CLAUDE_CODE_USE_VERTEX=1
+export ANTHROPIC_VERTEX_PROJECT_ID="your-gcp-project-id"
+export VERTEXAI_LOCATION="us-central1"
+
+# Run HolmesGPT with Vertex AI Claude
+holmes ask "what pods are failing?" --model="vertex_ai/claude-3-5-sonnet@20240620"
 ```
 
 ## See Also

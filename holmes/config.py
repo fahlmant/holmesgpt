@@ -49,6 +49,10 @@ class Config(RobustaBaseConfig):
     api_version: Optional[str] = None
     fast_model: Optional[str] = None
     max_steps: int = 40
+
+    # Vertex AI Claude configuration
+    claude_code_use_vertex: Optional[bool] = None
+    anthropic_vertex_project_id: Optional[str] = None
     cluster_name: Optional[str] = None
 
     alertmanager_url: Optional[str] = None
@@ -188,6 +192,8 @@ class Config(RobustaBaseConfig):
             "github_repository",
             "github_pat",
             "github_query",
+            "claude_code_use_vertex",
+            "anthropic_vertex_project_id",
             # TODO
             # custom_runbooks
         ]:
@@ -455,6 +461,17 @@ class Config(RobustaBaseConfig):
             api_key = model_params.pop("api_key", None)
 
         model = model_params.pop("model")
+
+        # Handle Vertex AI Claude configuration
+        if self.claude_code_use_vertex or model.startswith("vertex_ai/claude"):
+            # Set Vertex AI specific parameters if they're available
+            if self.anthropic_vertex_project_id:
+                model_params["vertex_project"] = self.anthropic_vertex_project_id
+
+            # Ensure the model name has the vertex_ai prefix for Claude models
+            if "claude" in model.lower() and not model.startswith("vertex_ai/"):
+                model = f"vertex_ai/{model}"
+
         # It's ok if the model does not have api base and api version, which are defaults to None.
         # Handle both api_base and base_url - api_base takes precedence
         model_api_base = model_params.pop("api_base", None)
